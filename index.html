@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Mein Training">
-<title>Mein Training</title>
+<meta name="apple-mobile-web-app-title" content="Comeback!">
+<title>Comeback!</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -473,12 +473,68 @@
     cursor: pointer;
     white-space: nowrap;
   }
+
+  /* ── Onboarding ── */
+  .onboarding-overlay {
+    position: fixed;
+    inset: 0;
+    background: #0d1117;
+    z-index: 500;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 32px;
+  }
+  .onboarding-overlay.hidden { display: none; }
+  .onboarding-emoji { font-size: 64px; line-height: 1; margin-bottom: 22px; }
+  .onboarding-title { font-size: 26px; font-weight: 900; color: #f0f6fc; text-align: center; line-height: 1.3; margin-bottom: 8px; }
+  .onboarding-sub { font-size: 15px; color: #8b949e; text-align: center; margin-bottom: 32px; }
+  .onboarding-input {
+    width: 100%;
+    max-width: 280px;
+    background: #161b22;
+    border: 2px solid #30363d;
+    border-radius: 14px;
+    padding: 16px 20px;
+    color: #f0f6fc;
+    font-size: 22px;
+    font-weight: 700;
+    font-family: inherit;
+    text-align: center;
+    outline: none;
+    margin-bottom: 14px;
+  }
+  .onboarding-input:focus { border-color: #58a6ff; }
+  .btn-onboarding-start {
+    width: 100%;
+    max-width: 280px;
+    padding: 16px;
+    background: #238636;
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn-onboarding-start:active { background: #196127; }
 </style>
 </head>
 <body>
 
+<!-- ── Onboarding ── -->
+<div id="onboarding" class="onboarding-overlay">
+  <div class="onboarding-emoji">⚽</div>
+  <div class="onboarding-title">Dein Comeback<br>beginnt hier.</div>
+  <div class="onboarding-sub">Wie heißt du?</div>
+  <input class="onboarding-input" id="name-input" type="text" placeholder="Dein Vorname" maxlength="20" autocomplete="off" autocapitalize="words">
+  <button class="btn-onboarding-start" onclick="saveName()">Los geht's! 🔥</button>
+</div>
+
 <div class="app-header">
-  <h1>🔥 MEIN COMEBACKPLAN</h1>
+  <h1 id="header-title">🔥 MEIN COMEBACKPLAN</h1>
   <div class="subtitle">Stärker. Schneller. Schmerzfrei.</div>
   <div class="subtitle-cta">Trainiere 2–3x täglich</div>
 </div>
@@ -492,6 +548,7 @@
 
   <!-- Daily Slogan -->
   <div class="slogan-box">
+    <div class="slogan-day" id="slogan-greeting-label"></div>
     <div class="slogan-text" id="daily-slogan">Lade...</div>
     <div class="slogan-day" id="slogan-day-label"></div>
   </div>
@@ -985,12 +1042,30 @@ const BENEFIT_MESSAGES = [
   'Champions arbeiten genau so. Weiter so.',
 ];
 
+// ─── Daily Greeting Labels (13) ───────────────────────────
+const GREETING_LABELS = [
+  'du bist ein Kämpfer',
+  'heute schreibst du dein Comeback',
+  'zeig, was du draufhast',
+  'Champions werden hier gemacht',
+  'kein Schritt zurück',
+  'du schaffst das',
+  'heute bist du näher dran',
+  'Champions geben nicht auf',
+  'der Weg zurück beginnt hier',
+  'Stärke wächst genau hier',
+  'jeder Tag zählt',
+  'dein Matchplan',
+  'du willst spielen – also trainiere',
+];
+
 // ─── State ────────────────────────────────────────────────
 let doneToday     = new Set();
 let history       = [];
 let streak        = 0;
 let totalSessions = 0;
 let deviceId      = '';
+let userName      = '';
 
 // ─── Date Helpers ─────────────────────────────────────────
 const todayStr      = () => new Date().toISOString().split('T')[0];
@@ -1010,7 +1085,7 @@ function getOrCreateDeviceId() {
 
 // ─── Cloud Sync ───────────────────────────────────────────
 function getPayload() {
-  return { history, totalSessions, lastSync: todayStr() };
+  return { history, totalSessions, name: userName, lastSync: todayStr() };
 }
 
 async function syncToCloud() {
@@ -1053,13 +1128,35 @@ function setSyncStatus(state, msg) {
   text.textContent = msg;
 }
 
+// ─── Name: Apply & Save ───────────────────────────────────
+function applyName(name) {
+  userName = name;
+  document.getElementById('header-title').textContent = 'Hey ' + name + '! 🔥';
+  renderDailySlogan();
+}
+
+function saveName() {
+  const raw = document.getElementById('name-input').value.trim();
+  if (!raw) return;
+  const name = raw.charAt(0).toUpperCase() + raw.slice(1).toLowerCase();
+  localStorage.setItem('mn_name', name);
+  document.getElementById('onboarding').classList.add('hidden');
+  applyName(name);
+  syncToCloud();
+}
+
 // ─── Daily Slogan ─────────────────────────────────────────
 function renderDailySlogan() {
   const now   = new Date();
   const start = new Date(now.getFullYear(), 0, 0);
   const dayOfYear = Math.floor((now - start) / 86400000);
-  const idx   = dayOfYear % SLOGANS.length;
-  document.getElementById('daily-slogan').textContent = SLOGANS[idx];
+  const sloganIdx  = dayOfYear % SLOGANS.length;
+  const labelIdx   = dayOfYear % GREETING_LABELS.length;
+  document.getElementById('daily-slogan').textContent = SLOGANS[sloganIdx];
+  const greeting = userName
+    ? 'Hey ' + userName + ', ' + GREETING_LABELS[labelIdx] + ':'
+    : GREETING_LABELS[labelIdx] + ':';
+  document.getElementById('slogan-greeting-label').textContent = greeting;
   const days  = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
   document.getElementById('slogan-day-label').textContent =
     days[now.getDay()] + ', ' + now.getDate() + '.' + (now.getMonth()+1) + '.';
@@ -1080,6 +1177,17 @@ async function init() {
   // totalSessions tracked separately (allows multiple sessions per day)
   const savedTotal = localStorage.getItem('mn_total_sessions');
   totalSessions = savedTotal ? parseInt(savedTotal) : history.length;
+
+  // Name: show onboarding if not set yet
+  const savedName = localStorage.getItem('mn_name');
+  if (savedName) {
+    document.getElementById('onboarding').classList.add('hidden');
+    applyName(savedName);
+  } else {
+    document.getElementById('onboarding').classList.remove('hidden');
+    // onboarding shown; saveName() will call applyName() and syncToCloud()
+  }
+
   recalcStreak();
   refreshUI();
   renderCalendar();
@@ -1103,6 +1211,12 @@ async function init() {
         recalcStreak();
         renderCalendar();
         renderBadges();
+      }
+      // Restore name from cloud if missing locally
+      if (cloud.name && !localStorage.getItem('mn_name')) {
+        localStorage.setItem('mn_name', cloud.name);
+        document.getElementById('onboarding').classList.add('hidden');
+        applyName(cloud.name);
       }
     }
     const d = new Date();
