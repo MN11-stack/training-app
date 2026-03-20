@@ -107,6 +107,20 @@
   .complete-banner .emoji { font-size: 44px; line-height: 1; }
   .complete-banner h2 { font-size: 20px; font-weight: 800; color: #3fb950; margin: 8px 0 4px; }
   .complete-banner p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+  .btn-new-session {
+    margin-top: 14px;
+    padding: 11px 24px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    color: #8b949e;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-new-session:active { color: #f0f6fc; border-color: #58a6ff; }
 
   /* ── Exercise Card ── */
   .exercise-card {
@@ -497,6 +511,7 @@
     <div class="emoji">🎉</div>
     <h2>Training abgeschlossen!</h2>
     <p id="complete-benefit">Klasse gemacht – du baust deinen Körper auf.</p>
+    <button class="btn-new-session" onclick="resetForNewSession()">↺ Neue Einheit starten</button>
   </div>
 
   <!-- ─── Übung 1: Herabschauender Hund ─── -->
@@ -995,7 +1010,7 @@ function getOrCreateDeviceId() {
 
 // ─── Cloud Sync ───────────────────────────────────────────
 function getPayload() {
-  return { history, lastSync: todayStr() };
+  return { history, totalSessions, lastSync: todayStr() };
 }
 
 async function syncToCloud() {
@@ -1062,7 +1077,9 @@ async function init() {
   const savedToday = localStorage.getItem('mn_today_' + todayStr());
   if (savedToday) doneToday = new Set(JSON.parse(savedToday));
 
-  totalSessions = history.length;
+  // totalSessions tracked separately (allows multiple sessions per day)
+  const savedTotal = localStorage.getItem('mn_total_sessions');
+  totalSessions = savedTotal ? parseInt(savedTotal) : history.length;
   recalcStreak();
   refreshUI();
   renderCalendar();
@@ -1075,9 +1092,13 @@ async function init() {
     const cloud = await loadFromCloud(deviceId);
     if (cloud && cloud.history) {
       const merged = [...new Set([...history, ...cloud.history])].sort();
-      if (merged.length > history.length) {
+      const cloudTotal = cloud.totalSessions || 0;
+      if (merged.length > history.length || cloudTotal > totalSessions) {
         history = merged;
-        totalSessions = history.length;
+        if (cloudTotal > totalSessions) {
+          totalSessions = cloudTotal;
+          localStorage.setItem('mn_total_sessions', totalSessions);
+        }
         localStorage.setItem('mn_history', JSON.stringify(history));
         recalcStreak();
         renderCalendar();
@@ -1123,12 +1144,15 @@ function markDone(idx) {
 // ─── Session Complete ─────────────────────────────────────
 async function onSessionComplete() {
   const today = todayStr();
+  // Add date to history for streak (only once per day)
   if (!history.includes(today)) {
     history.push(today);
-    totalSessions = history.length;
     localStorage.setItem('mn_history', JSON.stringify(history));
     recalcStreak();
   }
+  // Always increment total session counter (multiple sessions per day allowed)
+  totalSessions++;
+  localStorage.setItem('mn_total_sessions', totalSessions);
   const benefitIdx = (totalSessions - 1) % BENEFIT_MESSAGES.length;
   document.getElementById('complete-benefit').textContent = BENEFIT_MESSAGES[benefitIdx < 0 ? 0 : benefitIdx];
   document.getElementById('complete-banner').classList.add('show');
@@ -1137,6 +1161,23 @@ async function onSessionComplete() {
   setTimeout(() => showToast('🎉 Training abgeschlossen!'), 600);
   // Auto-sync to cloud
   await syncToCloud();
+}
+
+// ─── Reset for New Session ────────────────────────────────
+function resetForNewSession() {
+  doneToday = new Set();
+  localStorage.removeItem('mn_today_' + todayStr());
+  document.getElementById('complete-banner').classList.remove('show');
+  document.getElementById('session-icon').textContent = '🏃';
+  for (let i = 0; i < TOTAL_EXERCISES; i++) {
+    document.getElementById('card-'+i).classList.remove('done');
+    const btn = document.getElementById('btn-'+i);
+    btn.textContent = '✓ Fertig';
+    btn.classList.remove('done-state');
+    btn.disabled = false;
+  }
+  refreshUI();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ─── Refresh UI ───────────────────────────────────────────
