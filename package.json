@@ -1,0 +1,6 @@
+{
+  "name": "training-app-sohn",
+  "version": "1.0.0",
+  "description": "Trainingsplan-App mit Upstash-Sync",
+  "private": true
+}

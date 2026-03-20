@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Mein Training">
+<title>Mein Training</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #0d1117;
+    color: #f0f6fc;
+    min-height: 100vh;
+    padding-bottom: 72px;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    background: #161b22;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #21262d;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .app-header h1 { font-size: 22px; font-weight: 800; color: #58a6ff; letter-spacing: -0.3px; }
+  .app-header .subtitle { font-size: 13px; color: #8b949e; margin-top: 2px; }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: #161b22;
+    border-top: 1px solid #21262d;
+    display: flex;
+    z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .nav-btn {
+    flex: 1;
+    padding: 10px 0 14px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: #6e7681;
+    font-size: 11px;
+    font-family: inherit;
+    font-weight: 600;
+    transition: color 0.2s;
+    letter-spacing: 0.2px;
+  }
+  .nav-btn .nav-icon { font-size: 24px; display: block; margin-bottom: 2px; }
+  .nav-btn.active { color: #58a6ff; }
+
+  /* ── Sections ── */
+  .section { display: none; padding: 14px 14px 0; }
+  .section.active { display: block; }
+
+  /* ── Session Status Bar ── */
+  .session-status {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .session-status .label { font-size: 12px; color: #8b949e; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  .session-status .count { font-size: 22px; font-weight: 800; color: #58a6ff; margin-top: 2px; }
+
+  /* Progress bar */
+  .progress-bar-wrap {
+    background: #21262d;
+    border-radius: 4px;
+    height: 5px;
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #58a6ff, #3fb950);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── Complete Banner ── */
+  .complete-banner {
+    display: none;
+    background: linear-gradient(135deg, #1a3c1e 0%, #0d2010 100%);
+    border: 1px solid #238636;
+    border-radius: 14px;
+    padding: 22px 18px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .complete-banner.show { display: block; }
+  .complete-banner .emoji { font-size: 44px; line-height: 1; }
+  .complete-banner h2 { font-size: 20px; font-weight: 800; color: #3fb950; margin: 8px 0 4px; }
+  .complete-banner p { font-size: 13px; color: #8b949e; line-height: 1.5; }
+
+  /* ── Exercise Card ── */
+  .exercise-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    transition: border-color 0.4s, opacity 0.4s;
+  }
+  .exercise-card.done {
+    border-color: #238636;
+    opacity: 0.65;
+  }
+
+  .card-illustration {
+    background: #0d1117;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid #21262d;
+  }
+
+  .card-body { padding: 16px; }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .card-number {
+    font-size: 11px;
+    color: #58a6ff;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .card-done-badge {
+    display: none;
+    font-size: 11px;
+    color: #3fb950;
+    font-weight: 700;
+    background: #1a3c1e;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .exercise-card.done .card-done-badge { display: inline-block; }
+
+  .card-title {
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+    margin-bottom: 8px;
+  }
+  .card-reps {
+    display: inline-block;
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    color: #58a6ff;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+  .card-desc {
+    font-size: 14px;
+    color: #c9d1d9;
+    line-height: 1.65;
+    margin-bottom: 10px;
+  }
+  .card-feel {
+    font-size: 13px;
+    color: #3fb950;
+    padding: 9px 12px;
+    background: rgba(63, 185, 80, 0.08);
+    border-radius: 8px;
+    border-left: 3px solid #238636;
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  .card-actions { display: flex; gap: 10px; }
+
+  .btn-done {
+    flex: 1;
+    padding: 13px;
+    background: #238636;
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-done:active { transform: scale(0.96); }
+  .btn-done.done-state {
+    background: #1a3c1e;
+    color: #3fb950;
+    cursor: default;
+  }
+
+  .btn-video {
+    padding: 13px 16px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    color: #8b949e;
+    font-size: 18px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s, color 0.2s;
+    white-space: nowrap;
+    gap: 5px;
+  }
+  .btn-video span { font-size: 12px; font-weight: 600; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: #238636;
+    color: #fff;
+    padding: 11px 22px;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 300;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── Progress Section ── */
+  .streak-card {
+    background: linear-gradient(145deg, #1c1830, #0d1117);
+    border: 1px solid #3d2f8f44;
+    border-radius: 16px;
+    padding: 28px 20px 22px;
+    text-align: center;
+    margin-bottom: 14px;
+  }
+  .streak-fire { font-size: 44px; line-height: 1; }
+  .streak-number { font-size: 58px; font-weight: 900; color: #f0883e; line-height: 1.1; letter-spacing: -2px; }
+  .streak-label { font-size: 14px; color: #8b949e; margin-top: 4px; font-weight: 500; }
+  .streak-sub { font-size: 13px; color: #6e7681; margin-top: 10px; min-height: 18px; }
+
+  .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .stat-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+  }
+  .stat-number { font-size: 34px; font-weight: 900; color: #58a6ff; letter-spacing: -1px; }
+  .stat-label { font-size: 12px; color: #8b949e; margin-top: 4px; font-weight: 500; }
+
+  /* ── Calendar ── */
+  .calendar-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 12px;
+  }
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .cal-wd { text-align: center; font-size: 10px; color: #6e7681; font-weight: 700; padding: 2px 0; }
+  .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .cal-day {
+    aspect-ratio: 1;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: #6e7681;
+    font-weight: 500;
+  }
+  .cal-day.trained { background: #238636; color: #fff; font-weight: 700; }
+  .cal-day.today { outline: 2px solid #58a6ff; outline-offset: 1px; color: #58a6ff; font-weight: 700; }
+  .cal-day.today.trained { background: #238636; outline-color: #3fb950; color: #fff; }
+  .cal-day.future { opacity: 0.15; }
+  .cal-day.empty { background: transparent; }
+
+  /* ── Badges ── */
+  .badges-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .badge-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .badge-item {
+    background: #0d1117;
+    border: 1px solid #21262d;
+    border-radius: 14px;
+    padding: 14px 12px;
+    text-align: center;
+    filter: grayscale(1);
+    opacity: 0.35;
+    transition: all 0.4s;
+  }
+  .badge-item.earned {
+    filter: grayscale(0);
+    opacity: 1;
+    border-color: rgba(240, 136, 62, 0.4);
+    background: rgba(240, 136, 62, 0.05);
+  }
+  .badge-emoji { font-size: 30px; line-height: 1; }
+  .badge-name { font-size: 13px; font-weight: 800; color: #f0f6fc; margin-top: 5px; }
+  .badge-req { font-size: 11px; color: #8b949e; margin-top: 2px; }
+  .badge-item.earned .badge-req { color: #f0883e; }
+
+  /* ── Sync Card ── */
+  .sync-card {
+    background: #161b22;
+    border: 1px solid #21262d;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .sync-status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    color: #8b949e;
+  }
+  .sync-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #6e7681;
+    flex-shrink: 0;
+  }
+  .sync-dot.synced  { background: #3fb950; }
+  .sync-dot.pending { background: #f0883e; }
+  .sync-dot.error   { background: #f85149; }
+
+  .device-id-box {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .device-id-label { font-size: 11px; color: #8b949e; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .device-id-row { display: flex; align-items: center; gap: 10px; }
+  .device-id-value { font-size: 18px; font-weight: 800; color: #f0883e; letter-spacing: 2px; flex: 1; }
+  .btn-copy {
+    padding: 6px 12px;
+    background: #21262d;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    color: #8b949e;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  .restore-section { border-top: 1px solid #21262d; padding-top: 12px; }
+  .restore-label { font-size: 12px; color: #6e7681; margin-bottom: 8px; }
+  .restore-row { display: flex; gap: 8px; }
+  .restore-input {
+    flex: 1;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 8px;
+    padding: 9px 12px;
+    color: #f0f6fc;
+    font-size: 16px;
+    font-family: inherit;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .restore-input::placeholder { color: #6e7681; letter-spacing: 0; font-weight: 400; font-size: 14px; }
+  .btn-restore {
+    padding: 9px 14px;
+    background: #1f6feb;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>💪 Mein Training</h1>
+  <div class="subtitle">Füße &amp; Beine stärken – täglich 10–15 Min.</div>
+</div>
+
+<div id="toast" class="toast">✓ Super gemacht!</div>
+
+<!-- ══════════════════════════════════════════
+     TAB 1: TRAINING
+══════════════════════════════════════════ -->
+<div id="section-training" class="section active">
+
+  <div class="session-status">
+    <div>
+      <div class="label">Heute geschafft</div>
+      <div class="count"><span id="done-count">0</span> / 6 Übungen</div>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progress-bar"></div>
+      </div>
+    </div>
+    <div style="font-size:32px; line-height:1" id="session-icon">🏃</div>
+  </div>
+
+  <div id="complete-banner" class="complete-banner">
+    <div class="emoji">🎉</div>
+    <h2>Training abgeschlossen!</h2>
+    <p>Klasse gemacht – du baust deinen Körper<br>Schritt für Schritt auf. Weiter so!</p>
+  </div>
+
+  <!-- ─── Übung 1: Herabschauender Hund ─── -->
+  <div class="exercise-card" id="card-0">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ground -->
+        <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Body triangle -->
+        <line x1="55"  y1="135" x2="120" y2="52" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <line x1="185" y1="135" x2="120" y2="52" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Forearms / hands -->
+        <line x1="55" y1="135" x2="30" y2="115" stroke="#58a6ff" stroke-width="4" stroke-linecap="round"/>
+        <line x1="185" y1="135" x2="210" y2="115" stroke="#58a6ff" stroke-width="4" stroke-linecap="round"/>
+        <!-- Hands on ground -->
+        <ellipse cx="27" cy="118" rx="6" ry="4" fill="#58a6ff" opacity="0.7"/>
+        <ellipse cx="213" cy="118" rx="6" ry="4" fill="#58a6ff" opacity="0.7"/>
+        <!-- Feet - LEFT pushing down -->
+        <ellipse cx="55" cy="136" rx="7" ry="4" fill="#3fb950"/>
+        <ellipse cx="185" cy="136" rx="7" ry="4" fill="#58a6ff" opacity="0.6"/>
+        <!-- Arrow: heel pressing down -->
+        <path d="M55 128 L55 140" stroke="#f0883e" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M51 137 L55 142 L59 137" stroke="#f0883e" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <!-- Head hint at hip -->
+        <circle cx="120" cy="44" r="8" fill="none" stroke="#58a6ff" stroke-width="2.5" opacity="0.5"/>
+        <!-- Label -->
+        <text x="120" y="18" text-anchor="middle" fill="#3fb950" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Ferse Richtung Boden drücken</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 1 · Waden &amp; Achillessehne</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Herabschauender Hund</div>
+      <div class="card-reps">3 × 45 Sekunden</div>
+      <div class="card-desc">Hände schulterbreit auf dem Boden, Hüfte weit hochschieben – ein umgekehrtes V entsteht. Abwechselnd eine Ferse Richtung Boden drücken und 3 Sekunden halten, dann die andere Seite.</div>
+      <div class="card-feel">💡 Du spürst die Dehnung in der Wade und hinten am Oberschenkel – beide Seiten gleichzeitig.</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(0)" id="btn-0">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=herabschauender+hund+yoga+wade+dehnen+anleitung+deutsch" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Übung 2: Soleus Stretch ─── -->
+  <div class="exercise-card" id="card-1">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Wall -->
+        <rect x="195" y="5" width="8" height="130" fill="#21262d" rx="2"/>
+        <!-- Back foot (bent knee - active side) -->
+        <ellipse cx="80" cy="136" rx="8" ry="4" fill="#3fb950"/>
+        <!-- Back leg bent -->
+        <line x1="80" y1="132" x2="95" y2="100" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <!-- Knee circle (bent) -->
+        <circle cx="95" cy="100" r="6" fill="#f0883e" opacity="0.85"/>
+        <!-- Upper leg -->
+        <line x1="95" y1="100" x2="110" y2="70" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <!-- Front foot -->
+        <ellipse cx="130" cy="136" rx="8" ry="4" fill="#58a6ff" opacity="0.6"/>
+        <!-- Front leg -->
+        <line x1="130" y1="132" x2="115" y2="90" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <!-- Body -->
+        <line x1="110" y1="70" x2="118" y2="38" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <!-- Arms on wall -->
+        <line x1="118" y1="50" x2="193" y2="60" stroke="#58a6ff" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="118" y1="55" x2="193" y2="80" stroke="#58a6ff" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Head -->
+        <circle cx="120" cy="27" r="11" fill="none" stroke="#58a6ff" stroke-width="3"/>
+        <!-- Label bent knee -->
+        <text x="68" y="20" text-anchor="middle" fill="#f0883e" font-size="11" font-family="-apple-system,sans-serif" font-weight="600">Knie bleibt gebeugt!</text>
+        <path d="M82 24 L93 95" stroke="#f0883e" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 2 · Tiefe Wade (Soleus)</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Soleus-Stretch</div>
+      <div class="card-reps">3 × 45 Sekunden je Seite</div>
+      <div class="card-desc">An einer Wand abstützen. Das hintere Bein einen kleinen Schritt zurück stellen – Knie leicht gebeugt lassen, Ferse bleibt am Boden. Sanft nach vorne lehnen bis du die Dehnung spürst.</div>
+      <div class="card-feel">💡 Die Dehnung sitzt tief in der Wade direkt oberhalb der Ferse – nicht oben in der Wade.</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(1)" id="btn-1">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=soleus+dehnen+untere+wade+knie+gebeugt+physiotherapie+deutsch" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Übung 3: Schmetterling ─── -->
+  <div class="exercise-card" id="card-2">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Seated torso -->
+        <line x1="120" y1="130" x2="120" y2="78" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Left leg out -->
+        <line x1="120" y1="115" x2="62" y2="90" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="62"  y1="90" x2="120" y2="130" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Right leg out -->
+        <line x1="120" y1="115" x2="178" y2="90" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <line x1="178" y1="90" x2="120" y2="130" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Knees -->
+        <circle cx="62"  cy="90" r="6" fill="#f0883e" opacity="0.9"/>
+        <circle cx="178" cy="90" r="6" fill="#f0883e" opacity="0.9"/>
+        <!-- Feet together -->
+        <ellipse cx="120" cy="132" rx="14" ry="5" fill="#3fb950" opacity="0.8"/>
+        <!-- Arms resting on shins -->
+        <line x1="120" y1="95" x2="68" y2="93" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="120" y1="95" x2="172" y2="93" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <!-- Head -->
+        <circle cx="120" cy="67" r="11" fill="none" stroke="#58a6ff" stroke-width="3"/>
+        <!-- Arrows knees down -->
+        <path d="M62 97 L62 110" stroke="#3fb950" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M57 107 L62 113 L67 107" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <path d="M178 97 L178 110" stroke="#3fb950" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M173 107 L178 113 L183 107" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <text x="120" y="18" text-anchor="middle" fill="#3fb950" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Knie sanft Richtung Boden sinken lassen</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 3 · Adduktoren (Innenseite)</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Schmetterling</div>
+      <div class="card-reps">3 × 45 Sekunden</div>
+      <div class="card-desc">Auf dem Boden sitzen, Fußsohlen gegeneinander legen. Rücken aufrecht halten. Die Knie langsam Richtung Boden sinken lassen – kein Schwingen oder Federn, nur ruhiges Halten.</div>
+      <div class="card-feel">💡 Du spürst die Dehnung an der Innenseite der Oberschenkel – das sind die Adduktoren.</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(2)" id="btn-2">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=schmetterling+dehnung+adduktoren+innenseite+oberschenkel+anleitung" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Übung 4: Short Foot ─── -->
+  <div class="exercise-card" id="card-3">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <!-- Ground -->
+        <line x1="20" y1="118" x2="220" y2="118" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Foot outline side view - BEFORE (flat) -->
+        <path d="M45 118 Q65 116 85 112 Q105 110 125 112 Q148 115 165 118"
+              stroke="#21262d" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-dasharray="5,3"/>
+        <!-- Foot outline side view - AFTER (arch lifted) -->
+        <path d="M45 118 Q68 116 88 106 Q108 96 130 104 Q150 110 165 118"
+              stroke="#58a6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <!-- Heel anchor -->
+        <circle cx="45" cy="118" r="9" fill="#58a6ff" opacity="0.5"/>
+        <text x="45" y="136" text-anchor="middle" fill="#6e7681" font-size="10" font-family="-apple-system,sans-serif">Ferse</text>
+        <!-- Ball of foot anchor -->
+        <circle cx="165" cy="118" r="9" fill="#3fb950" opacity="0.7"/>
+        <text x="165" y="136" text-anchor="middle" fill="#3fb950" font-size="10" font-family="-apple-system,sans-serif">Ballen</text>
+        <!-- Arch arrow UP -->
+        <path d="M108 112 L108 96" stroke="#3fb950" stroke-width="3" stroke-linecap="round"/>
+        <path d="M103 99 L108 93 L113 99" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
+        <!-- Toes: STRAIGHT -->
+        <line x1="164" y1="110" x2="180" y2="104" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="164" y1="110" x2="183" y2="110" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="164" y1="110" x2="180" y2="116" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <!-- X over toe curl area -->
+        <text x="183" y="95" fill="#c9383880" font-size="16" font-family="sans-serif" font-weight="900">✕</text>
+        <text x="188" y="109" text-anchor="start" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">nicht</text>
+        <text x="188" y="120" text-anchor="start" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">krallen</text>
+        <!-- Label -->
+        <text x="108" y="20" text-anchor="middle" fill="#f0883e" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Gewölbe hochziehen – Zehen gerade lassen</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 4 · Fußgewölbe aktivieren</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Short Foot – Fußgewölbe</div>
+      <div class="card-reps">3 × 12 Wiederholungen · 5 Sek. halten</div>
+      <div class="card-desc">Barfuß sitzen, Fuß flach auf dem Boden. Jetzt den Fußballen (Vorderfuß) zur Ferse hin ziehen – ohne die Zehen zu krallen. Dadurch hebt sich das Gewölbe unter dem Fuß. 5 Sekunden halten, loslassen.</div>
+      <div class="card-feel">💡 Leichte Spannung unter dem Fußgewölbe – nicht in den Zehen. Wenn die Zehen sich einrollen, neu anfangen.</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(3)" id="btn-3">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=short+foot+exercise+fussgewoelbe+aktivieren+anleitung+deutsch" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Übung 5: Einbeinstand ─── -->
+  <div class="exercise-card" id="card-4">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Soft surface hint -->
+        <rect x="90" y="130" width="60" height="7" rx="3" fill="#21262d" opacity="0.6"/>
+        <text x="120" y="148" text-anchor="middle" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">Kissen / Handtuch</text>
+        <!-- Standing leg -->
+        <line x1="118" y1="133" x2="115" y2="95" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Hip -->
+        <circle cx="115" cy="92" r="5" fill="#58a6ff" opacity="0.6"/>
+        <!-- Raised leg: knee up -->
+        <line x1="115" y1="92" x2="135" y2="108" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <line x1="135" y1="108" x2="145" y2="128" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <circle cx="135" cy="108" r="5" fill="#f0883e" opacity="0.8"/>
+        <!-- Torso -->
+        <line x1="115" y1="92" x2="116" y2="56" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Arms out for balance -->
+        <line x1="116" y1="72" x2="82" y2="84" stroke="#58a6ff" stroke-width="3.5" stroke-linecap="round"/>
+        <line x1="116" y1="72" x2="150" y2="84" stroke="#58a6ff" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Head -->
+        <circle cx="116" cy="44" r="12" fill="none" stroke="#58a6ff" stroke-width="3"/>
+        <!-- Gaze dot (focus point) -->
+        <circle cx="190" cy="44" r="4" fill="#f0883e" opacity="0.7"/>
+        <line x1="128" y1="44" x2="184" y2="44" stroke="#f0883e" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.6"/>
+        <text x="190" y="36" text-anchor="middle" fill="#f0883e" font-size="9" font-family="-apple-system,sans-serif">Blick</text>
+        <text x="190" y="26" text-anchor="middle" fill="#f0883e" font-size="9" font-family="-apple-system,sans-serif">fixieren</text>
+        <!-- Foot on ground -->
+        <ellipse cx="118" cy="135" rx="9" ry="4" fill="#3fb950"/>
+        <!-- Wobble arrows around standing foot -->
+        <path d="M105 130 Q100 133 105 136" stroke="#3fb950" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <path d="M131 130 Q136 133 131 136" stroke="#3fb950" stroke-width="1.5" fill="none" opacity="0.5"/>
+        <text x="56" y="20" text-anchor="middle" fill="#3fb950" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Level 1: Boden · Level 2: Kissen</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 5 · Gleichgewicht &amp; Propriozeption</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Einbeinstand</div>
+      <div class="card-reps">3 × 30 Sekunden je Seite</div>
+      <div class="card-desc">Auf einem Bein stehen, das andere Knie leicht anheben. Einen Punkt anschauen und ruhig bleiben. <strong>Level 1:</strong> normaler Boden. <strong>Level 2:</strong> gefaltetes Handtuch oder weiches Kissen darunter.</div>
+      <div class="card-feel">💡 Der Knöchel macht kleine Zitter-Korrekturen – genau das ist das Training. Das soll so sein!</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(4)" id="btn-4">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=einbeinstand+gleichgewicht+training+sprunggelenk+stabilitaet+kinder" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Übung 6: Tibialis Posterior ─── -->
+  <div class="exercise-card" id="card-5">
+    <div class="card-illustration">
+      <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
+        <!-- Chair seat -->
+        <rect x="72" y="82" width="96" height="9" rx="4" fill="#30363d"/>
+        <line x1="82"  y1="91" x2="82"  y2="135" stroke="#30363d" stroke-width="5"/>
+        <line x1="158" y1="91" x2="158" y2="135" stroke="#30363d" stroke-width="5"/>
+        <!-- Torso -->
+        <line x1="120" y1="82" x2="120" y2="46" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Head -->
+        <circle cx="120" cy="34" r="12" fill="none" stroke="#58a6ff" stroke-width="3"/>
+        <!-- Left leg (passive) -->
+        <line x1="100" y1="82" x2="100" y2="115" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <ellipse cx="100" cy="118" rx="9" ry="4" fill="#58a6ff" opacity="0.4"/>
+        <!-- Right leg (active) -->
+        <line x1="140" y1="82" x2="140" y2="112" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
+        <!-- Foot rotating inward -->
+        <path d="M128 113 Q138 110 150 117 Q155 120 152 124" stroke="#58a6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="150" cy="122" rx="8" ry="4" fill="#3fb950" opacity="0.8" transform="rotate(-20,150,122)"/>
+        <!-- Theraband -->
+        <path d="M128 117 C112 124 90 130 65 132" stroke="#f0883e" stroke-width="2.5" fill="none" stroke-dasharray="5,2.5"/>
+        <circle cx="60" cy="133" r="7" fill="#f0883e" opacity="0.6"/>
+        <!-- Arrow inward rotation -->
+        <path d="M155 112 C164 106 166 98 158 95" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M154 94 L159 93 L158 99" stroke="#3fb950" stroke-width="2" fill="#3fb950"/>
+        <!-- Labels -->
+        <text x="55" y="148" text-anchor="middle" fill="#f0883e" font-size="10" font-family="-apple-system,sans-serif" font-weight="600">Theraband</text>
+        <text x="175" y="100" text-anchor="start" fill="#3fb950" font-size="10" font-family="-apple-system,sans-serif">nach</text>
+        <text x="175" y="112" text-anchor="start" fill="#3fb950" font-size="10" font-family="-apple-system,sans-serif">innen</text>
+      </svg>
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-number">Übung 6 · Tibialis posterior stärken</span>
+        <span class="card-done-badge">✓ Erledigt</span>
+      </div>
+      <div class="card-title">Fußinnenrand – Theraband</div>
+      <div class="card-reps">3 × 15 Wiederholungen je Seite</div>
+      <div class="card-desc">Sitzend auf einem Stuhl. Ein Theraband um den Vorderfuß legen und am Stuhlbein oder an einem Möbel befestigen. Den Fuß langsam nach innen drehen, 2 Sekunden halten, dann kontrolliert zurück. Kein Schwung.</div>
+      <div class="card-feel">💡 Du spürst die Arbeit an der Innenseite des Unterschenkels und unter dem Fußgewölbe – das ist der Muskel, den wir stärken wollen.</div>
+      <div class="card-actions">
+        <button class="btn-done" onclick="markDone(5)" id="btn-5">✓ Fertig</button>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=tibialis+posterior+theraband+uebung+fussgewoelbe+physiotherapie+deutsch" target="_blank">▶ <span>Video</span></a>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section-training -->
+
+
+<!-- ══════════════════════════════════════════
+     TAB 2: FORTSCHRITT
+══════════════════════════════════════════ -->
+<div id="section-progress" class="section">
+
+  <div class="streak-card">
+    <div class="streak-fire">🔥</div>
+    <div class="streak-number" id="streak-number">0</div>
+    <div class="streak-label">Tage in Folge trainiert</div>
+    <div class="streak-sub" id="streak-sub">Fang heute an – dein erster Tag!</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-number" id="total-sessions">0</div>
+      <div class="stat-label">Trainings gesamt</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number" id="this-week">0</div>
+      <div class="stat-label">Diese Woche</div>
+    </div>
+  </div>
+
+  <div class="calendar-card">
+    <div class="section-title">📅 Letzte 4 Wochen</div>
+    <div class="cal-weekdays">
+      <div class="cal-wd">Mo</div><div class="cal-wd">Di</div>
+      <div class="cal-wd">Mi</div><div class="cal-wd">Do</div>
+      <div class="cal-wd">Fr</div><div class="cal-wd">Sa</div>
+      <div class="cal-wd">So</div>
+    </div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+  </div>
+
+  <div class="badges-card">
+    <div class="section-title">🏅 Abzeichen</div>
+    <div class="badge-list">
+      <div class="badge-item" id="badge-0">
+        <div class="badge-emoji">🥉</div>
+        <div class="badge-name">Starter</div>
+        <div class="badge-req">10 Trainings</div>
+      </div>
+      <div class="badge-item" id="badge-1">
+        <div class="badge-emoji">🥈</div>
+        <div class="badge-name">Durchhalter</div>
+        <div class="badge-req">25 Trainings</div>
+      </div>
+      <div class="badge-item" id="badge-2">
+        <div class="badge-emoji">🥇</div>
+        <div class="badge-name">Profi</div>
+        <div class="badge-req">50 Trainings</div>
+      </div>
+      <div class="badge-item" id="badge-3">
+        <div class="badge-emoji">🏆</div>
+        <div class="badge-name">Legende</div>
+        <div class="badge-req">100 Trainings</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sync & Backup ── -->
+  <div class="sync-card">
+    <div class="section-title">☁️ Cloud-Sicherung</div>
+    <div class="sync-status-row">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-status-text">Wird geprüft…</span>
+    </div>
+
+    <div class="device-id-box">
+      <div class="device-id-label">Dein persönlicher Code</div>
+      <div class="device-id-row">
+        <div class="device-id-value" id="device-id-display">----</div>
+        <button class="btn-copy" onclick="copyDeviceId()">📋 Kopieren</button>
+      </div>
+    </div>
+
+    <div class="restore-section">
+      <div class="restore-label">Fortschritt auf neuem Gerät wiederherstellen:</div>
+      <div class="restore-row">
+        <input class="restore-input" id="restore-input" placeholder="Code eingeben" maxlength="8"/>
+        <button class="btn-restore" onclick="restoreFromInput()">Laden</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /section-progress -->
+
+
+<!-- ══════════ BOTTOM NAV ══════════ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" onclick="showTab('training')" id="nav-training">
+    <span class="nav-icon">🏋️</span>Training
+  </button>
+  <button class="nav-btn" onclick="showTab('progress')" id="nav-progress">
+    <span class="nav-icon">📊</span>Fortschritt
+  </button>
+</nav>
+
+
+<script>
+// ─── Constants ────────────────────────────────────────────
+const TOTAL_EXERCISES  = 6;
+const BADGE_THRESHOLDS = [10, 25, 50, 100];
+const API              = '/api/sync';
+
+// ─── State ────────────────────────────────────────────────
+let doneToday     = new Set();
+let history       = [];
+let streak        = 0;
+let totalSessions = 0;
+let deviceId      = '';
+
+// ─── Date Helpers ─────────────────────────────────────────
+const todayStr      = () => new Date().toISOString().split('T')[0];
+const offsetDateStr = d => { const x = new Date(); x.setDate(x.getDate()+d); return x.toISOString().split('T')[0]; };
+const prevDay       = s => { const d = new Date(s); d.setDate(d.getDate()-1); return d.toISOString().split('T')[0]; };
+
+// ─── Device ID ────────────────────────────────────────────
+function getOrCreateDeviceId() {
+  let id = localStorage.getItem('mn_device_id');
+  if (!id) {
+    id = Math.random().toString(36).slice(2,6).toUpperCase() +
+         Math.random().toString(36).slice(2,6).toUpperCase();
+    localStorage.setItem('mn_device_id', id);
+  }
+  return id;
+}
+
+// ─── Cloud Sync ───────────────────────────────────────────
+function getPayload() {
+  return { history, lastSync: todayStr() };
+}
+
+async function syncToCloud() {
+  setSyncStatus('pending', 'Wird gespeichert…');
+  try {
+    const r = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: deviceId, data: getPayload() })
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    localStorage.removeItem('mn_pending_sync');
+    const d = new Date();
+    setSyncStatus('synced', `Gespeichert – ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} Uhr`);
+  } catch {
+    localStorage.setItem('mn_pending_sync', '1');
+    setSyncStatus('error', 'Kein Internet – wird nachgeholt');
+  }
+}
+
+async function loadFromCloud(id) {
+  try {
+    const r = await fetch(`${API}?id=${id}`);
+    if (!r.ok) return null;
+    const j = await r.json();
+    return j.data || null;
+  } catch { return null; }
+}
+
+async function retryPendingSync() {
+  if (localStorage.getItem('mn_pending_sync')) await syncToCloud();
+}
+
+// ─── Sync Status UI ───────────────────────────────────────
+function setSyncStatus(state, msg) {
+  const dot  = document.getElementById('sync-dot');
+  const text = document.getElementById('sync-status-text');
+  if (!dot) return;
+  dot.className  = 'sync-dot ' + state;
+  text.textContent = msg;
+}
+
+// ─── Load & Init ──────────────────────────────────────────
+async function init() {
+  deviceId = getOrCreateDeviceId();
+  document.getElementById('device-id-display').textContent = deviceId;
+
+  // 1. Load from localStorage (fast, always works)
+  const saved = localStorage.getItem('mn_history');
+  history = saved ? JSON.parse(saved) : [];
+
+  const savedToday = localStorage.getItem('mn_today_' + todayStr());
+  if (savedToday) doneToday = new Set(JSON.parse(savedToday));
+
+  totalSessions = history.length;
+  recalcStreak();
+  refreshUI();
+  renderCalendar();
+  renderBadges();
+  setSyncStatus('', 'Verbinde…');
+
+  // 2. Merge with cloud (non-blocking)
+  try {
+    const cloud = await loadFromCloud(deviceId);
+    if (cloud && cloud.history) {
+      const merged = [...new Set([...history, ...cloud.history])].sort();
+      if (merged.length > history.length) {
+        history = merged;
+        totalSessions = history.length;
+        localStorage.setItem('mn_history', JSON.stringify(history));
+        recalcStreak();
+        renderCalendar();
+        renderBadges();
+      }
+    }
+    const d = new Date();
+    setSyncStatus('synced', `Synchronisiert – ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')} Uhr`);
+  } catch {
+    setSyncStatus('error', 'Offline – lokale Daten aktiv');
+  }
+
+  // 3. Retry pending sync
+  await retryPendingSync();
+}
+
+// ─── Tab Switching ────────────────────────────────────────
+function showTab(tab) {
+  ['training','progress'].forEach(t => {
+    document.getElementById('section-'+(t==='training'?'training':'progress')).classList.remove('active');
+    document.getElementById('nav-'+t).classList.remove('active');
+  });
+  document.getElementById('section-'+(tab==='training'?'training':'progress')).classList.add('active');
+  document.getElementById('nav-'+tab).classList.add('active');
+  if (tab === 'progress') { renderCalendar(); renderBadges(); }
+}
+
+// ─── Mark Exercise Done ───────────────────────────────────
+function markDone(idx) {
+  if (doneToday.has(idx)) return;
+  doneToday.add(idx);
+  localStorage.setItem('mn_today_' + todayStr(), JSON.stringify([...doneToday]));
+  document.getElementById('card-'+idx).classList.add('done');
+  const btn = document.getElementById('btn-'+idx);
+  btn.textContent = '✓ Erledigt';
+  btn.classList.add('done-state');
+  btn.disabled = true;
+  showToast('✓ Gut gemacht!');
+  refreshUI();
+  if (doneToday.size === TOTAL_EXERCISES) onSessionComplete();
+}
+
+// ─── Session Complete ─────────────────────────────────────
+async function onSessionComplete() {
+  const today = todayStr();
+  if (!history.includes(today)) {
+    history.push(today);
+    totalSessions = history.length;
+    localStorage.setItem('mn_history', JSON.stringify(history));
+    recalcStreak();
+  }
+  document.getElementById('complete-banner').classList.add('show');
+  document.getElementById('session-icon').textContent = '🎉';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  setTimeout(() => showToast('🎉 Training abgeschlossen!'), 600);
+  // Auto-sync to cloud
+  await syncToCloud();
+}
+
+// ─── Refresh UI ───────────────────────────────────────────
+function refreshUI() {
+  const count = doneToday.size;
+  document.getElementById('done-count').textContent = count;
+  document.getElementById('progress-bar').style.width = (count / TOTAL_EXERCISES * 100) + '%';
+  for (let i = 0; i < TOTAL_EXERCISES; i++) {
+    if (doneToday.has(i)) {
+      document.getElementById('card-'+i).classList.add('done');
+      const btn = document.getElementById('btn-'+i);
+      btn.textContent = '✓ Erledigt';
+      btn.classList.add('done-state');
+      btn.disabled = true;
+    }
+  }
+  if (count === TOTAL_EXERCISES) {
+    document.getElementById('complete-banner').classList.add('show');
+    document.getElementById('session-icon').textContent = '🎉';
+  }
+}
+
+// ─── Streak ───────────────────────────────────────────────
+function recalcStreak() {
+  if (!history.length) { streak = 0; return; }
+  const sorted = [...history].sort().reverse();
+  const today = todayStr(), yesterday = offsetDateStr(-1);
+  if (sorted[0] !== today && sorted[0] !== yesterday) { streak = 0; return; }
+  streak = 1;
+  let cur = sorted[0];
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i] === prevDay(cur)) { streak++; cur = sorted[i]; }
+    else break;
+  }
+}
+
+// ─── Calendar ─────────────────────────────────────────────
+function renderCalendar() {
+  const grid = document.getElementById('calendar-grid');
+  grid.innerHTML = '';
+  const today = new Date(), todayISO = todayStr();
+  const start = new Date(today);
+  start.setDate(today.getDate() - 27);
+  const dow = start.getDay();
+  start.setDate(start.getDate() - (dow === 0 ? 6 : dow - 1));
+  for (let i = 0; i < 28; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const iso = d.toISOString().split('T')[0];
+    const el = document.createElement('div');
+    el.className = 'cal-day';
+    if (d > today) { el.classList.add('future'); }
+    else {
+      el.textContent = d.getDate();
+      if (history.includes(iso)) el.classList.add('trained');
+      if (iso === todayISO) el.classList.add('today');
+    }
+    grid.appendChild(el);
+  }
+  document.getElementById('streak-number').textContent = streak;
+  document.getElementById('total-sessions').textContent = totalSessions;
+  const monday = new Date(today);
+  monday.setDate(today.getDate() - (today.getDay() === 0 ? 6 : today.getDay() - 1));
+  document.getElementById('this-week').textContent =
+    history.filter(d => d >= monday.toISOString().split('T')[0]).length;
+  const sub = document.getElementById('streak-sub');
+  if      (streak === 0)  sub.textContent = 'Fang heute an – dein erster Tag!';
+  else if (streak === 1)  sub.textContent = 'Gut gemacht! Morgen weiter!';
+  else if (streak < 7)   sub.textContent = streak + ' Tage am Stück – weiter so! 💪';
+  else if (streak < 14)  sub.textContent = 'Über eine Woche – starke Leistung! 🔥';
+  else if (streak < 30)  sub.textContent = streak + ' Tage – absolut beeindruckend! 🌟';
+  else                    sub.textContent = streak + ' Tage! Du bist eine Legende. 🏆';
+}
+
+// ─── Badges ───────────────────────────────────────────────
+function renderBadges() {
+  BADGE_THRESHOLDS.forEach((t, i) => {
+    if (totalSessions >= t) document.getElementById('badge-'+i).classList.add('earned');
+  });
+}
+
+// ─── Device ID Copy ───────────────────────────────────────
+function copyDeviceId() {
+  navigator.clipboard?.writeText(deviceId).then(() => showToast('📋 Code kopiert!'));
+}
+
+// ─── Restore from another device ──────────────────────────
+async function restoreFromInput() {
+  const input = document.getElementById('restore-input').value.trim().toUpperCase();
+  if (input.length < 6) { showToast('⚠️ Code zu kurz'); return; }
+  setSyncStatus('pending', 'Lade Daten…');
+  const cloud = await loadFromCloud(input);
+  if (!cloud || !cloud.history || !cloud.history.length) {
+    setSyncStatus('error', 'Kein Fortschritt für diesen Code');
+    showToast('❌ Code nicht gefunden');
+    return;
+  }
+  // Switch device ID and restore
+  deviceId = input;
+  localStorage.setItem('mn_device_id', deviceId);
+  document.getElementById('device-id-display').textContent = deviceId;
+  history = cloud.history;
+  totalSessions = history.length;
+  localStorage.setItem('mn_history', JSON.stringify(history));
+  recalcStreak();
+  refreshUI();
+  renderCalendar();
+  renderBadges();
+  setSyncStatus('synced', 'Fortschritt wiederhergestellt ✓');
+  showToast('✅ Alles wiederhergestellt!');
+  document.getElementById('restore-input').value = '';
+}
+
+// ─── Toast ────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─── Start ────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
