@@ -30,6 +30,7 @@
   }
   .app-header h1 { font-size: 22px; font-weight: 800; color: #58a6ff; letter-spacing: -0.3px; }
   .app-header .subtitle { font-size: 13px; color: #8b949e; margin-top: 2px; }
+  .app-header .subtitle-cta { font-size: 12px; color: #58a6ff; margin-top: 1px; font-weight: 600; letter-spacing: 0.2px; }
 
   /* ── Bottom Nav ── */
   .bottom-nav {
@@ -345,6 +346,43 @@
   .badge-req { font-size: 11px; color: #8b949e; margin-top: 2px; }
   .badge-item.earned .badge-req { color: #f0883e; }
 
+  /* ── Daily Slogan ── */
+  .slogan-box {
+    background: linear-gradient(135deg, #1a1f35 0%, #0d1117 100%);
+    border: 1px solid #3d2f8f44;
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .slogan-box::before {
+    content: '❝';
+    position: absolute;
+    top: -4px;
+    left: 12px;
+    font-size: 48px;
+    color: #3d2f8f;
+    line-height: 1;
+    font-family: Georgia, serif;
+  }
+  .slogan-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f0f6fc;
+    line-height: 1.5;
+    padding-left: 28px;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+  .slogan-day {
+    font-size: 11px;
+    color: #6e7681;
+    padding-left: 28px;
+    margin-top: 4px;
+  }
+
   /* ── Sync Card ── */
   .sync-card {
     background: #161b22;
@@ -426,8 +464,9 @@
 <body>
 
 <div class="app-header">
-  <h1>💪 Mein Training</h1>
-  <div class="subtitle">Füße &amp; Beine stärken – täglich 10–15 Min.</div>
+  <h1>🔥 MEIN COMEBACKPLAN</h1>
+  <div class="subtitle">Stärker. Schneller. Schmerzfrei.</div>
+  <div class="subtitle-cta">Trainiere 2–3x täglich</div>
 </div>
 
 <div id="toast" class="toast">✓ Super gemacht!</div>
@@ -436,6 +475,12 @@
      TAB 1: TRAINING
 ══════════════════════════════════════════ -->
 <div id="section-training" class="section active">
+
+  <!-- Daily Slogan -->
+  <div class="slogan-box">
+    <div class="slogan-text" id="daily-slogan">Lade...</div>
+    <div class="slogan-day" id="slogan-day-label"></div>
+  </div>
 
   <div class="session-status">
     <div>
@@ -451,7 +496,7 @@
   <div id="complete-banner" class="complete-banner">
     <div class="emoji">🎉</div>
     <h2>Training abgeschlossen!</h2>
-    <p>Klasse gemacht – du baust deinen Körper<br>Schritt für Schritt auf. Weiter so!</p>
+    <p id="complete-benefit">Klasse gemacht – du baust deinen Körper auf.</p>
   </div>
 
   <!-- ─── Übung 1: Herabschauender Hund ─── -->
@@ -477,8 +522,13 @@
         <path d="M51 137 L55 142 L59 137" stroke="#f0883e" stroke-width="2.5" fill="none" stroke-linejoin="round"/>
         <!-- Head hint at hip -->
         <circle cx="120" cy="44" r="8" fill="none" stroke="#58a6ff" stroke-width="2.5" opacity="0.5"/>
-        <!-- Label -->
-        <text x="120" y="18" text-anchor="middle" fill="#3fb950" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Ferse Richtung Boden drücken</text>
+        <!-- Labels -->
+        <text x="120" y="18" text-anchor="middle" fill="#3fb950" font-size="11" font-family="-apple-system,sans-serif" font-weight="600">Hüfte hoch – Fersen zum Boden drücken</text>
+        <text x="27" y="112" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="-apple-system,sans-serif">Hand</text>
+        <text x="213" y="112" text-anchor="middle" fill="#58a6ff" font-size="9" font-family="-apple-system,sans-serif">Hand</text>
+        <text x="42" y="148" text-anchor="middle" fill="#3fb950" font-size="9" font-family="-apple-system,sans-serif">Fuß L</text>
+        <text x="198" y="148" text-anchor="middle" fill="#3fb950" font-size="9" font-family="-apple-system,sans-serif">Fuß R</text>
+        <text x="120" y="38" text-anchor="middle" fill="#f0883e" font-size="9" font-family="-apple-system,sans-serif">Hüfte</text>
       </svg>
     </div>
     <div class="card-body">
@@ -620,8 +670,8 @@
         <text x="183" y="95" fill="#c9383880" font-size="16" font-family="sans-serif" font-weight="900">✕</text>
         <text x="188" y="109" text-anchor="start" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">nicht</text>
         <text x="188" y="120" text-anchor="start" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">krallen</text>
-        <!-- Label -->
-        <text x="108" y="20" text-anchor="middle" fill="#f0883e" font-size="11.5" font-family="-apple-system,sans-serif" font-weight="600">Gewölbe hochziehen – Zehen gerade lassen</text>
+        <text x="108" y="20" text-anchor="middle" fill="#f0883e" font-size="11" font-family="-apple-system,sans-serif" font-weight="600">Gewölbe hochziehen – Zehen gerade lassen!</text>
+        <text x="108" y="88" text-anchor="middle" fill="#3fb950" font-size="9" font-family="-apple-system,sans-serif">Gewölbe hebt sich</text>
       </svg>
     </div>
     <div class="card-body">
@@ -692,37 +742,42 @@
     </div>
   </div>
 
-  <!-- ─── Übung 6: Tibialis Posterior ─── -->
+  <!-- ─── Übung 6: Tibialis stehend ─── -->
   <div class="exercise-card" id="card-5">
     <div class="card-illustration">
       <svg viewBox="0 0 240 150" width="240" height="150" xmlns="http://www.w3.org/2000/svg">
         <line x1="10" y1="135" x2="230" y2="135" stroke="#21262d" stroke-width="2.5"/>
-        <!-- Chair seat -->
-        <rect x="72" y="82" width="96" height="9" rx="4" fill="#30363d"/>
-        <line x1="82"  y1="91" x2="82"  y2="135" stroke="#30363d" stroke-width="5"/>
-        <line x1="158" y1="91" x2="158" y2="135" stroke="#30363d" stroke-width="5"/>
-        <!-- Torso -->
-        <line x1="120" y1="82" x2="120" y2="46" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
-        <!-- Head -->
-        <circle cx="120" cy="34" r="12" fill="none" stroke="#58a6ff" stroke-width="3"/>
-        <!-- Left leg (passive) -->
-        <line x1="100" y1="82" x2="100" y2="115" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
-        <ellipse cx="100" cy="118" rx="9" ry="4" fill="#58a6ff" opacity="0.4"/>
+        <!-- Post / goalpost -->
+        <rect x="195" y="30" width="8" height="105" rx="3" fill="#30363d"/>
+        <text x="199" y="22" text-anchor="middle" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">Pfosten</text>
+        <!-- Standing person -->
+        <!-- Left leg (support) -->
+        <line x1="108" y1="135" x2="110" y2="92" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
         <!-- Right leg (active) -->
-        <line x1="140" y1="82" x2="140" y2="112" stroke="#58a6ff" stroke-width="4.5" stroke-linecap="round"/>
-        <!-- Foot rotating inward -->
-        <path d="M128 113 Q138 110 150 117 Q155 120 152 124" stroke="#58a6ff" stroke-width="4" fill="none" stroke-linecap="round"/>
-        <ellipse cx="150" cy="122" rx="8" ry="4" fill="#3fb950" opacity="0.8" transform="rotate(-20,150,122)"/>
-        <!-- Theraband -->
-        <path d="M128 117 C112 124 90 130 65 132" stroke="#f0883e" stroke-width="2.5" fill="none" stroke-dasharray="5,2.5"/>
-        <circle cx="60" cy="133" r="7" fill="#f0883e" opacity="0.6"/>
-        <!-- Arrow inward rotation -->
-        <path d="M155 112 C164 106 166 98 158 95" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-        <path d="M154 94 L159 93 L158 99" stroke="#3fb950" stroke-width="2" fill="#3fb950"/>
+        <line x1="122" y1="135" x2="120" y2="92" stroke="#58a6ff" stroke-width="5" stroke-linecap="round"/>
+        <!-- Foot rotating inward on right -->
+        <path d="M110 132 Q118 128 130 133" stroke="#3fb950" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <ellipse cx="125" cy="134" rx="8" ry="3.5" fill="#3fb950" opacity="0.7" transform="rotate(-15,125,134)"/>
+        <!-- Hip -->
+        <circle cx="115" cy="92" r="4" fill="#58a6ff" opacity="0.5"/>
+        <!-- Torso -->
+        <line x1="115" y1="92" x2="115" y2="55" stroke="#58a6ff" stroke-width="5.5" stroke-linecap="round"/>
+        <!-- Arms relaxed -->
+        <line x1="115" y1="72" x2="92" y2="82" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <line x1="115" y1="72" x2="138" y2="82" stroke="#58a6ff" stroke-width="3" stroke-linecap="round"/>
+        <!-- Head -->
+        <circle cx="115" cy="43" r="12" fill="none" stroke="#58a6ff" stroke-width="3"/>
+        <!-- Theraband from foot to post -->
+        <path d="M128 132 C150 130 170 128 193 110" stroke="#f0883e" stroke-width="2.5" fill="none" stroke-dasharray="5,2.5"/>
+        <circle cx="195" cy="108" r="5" fill="#f0883e" opacity="0.7"/>
+        <!-- Arrow: foot rotating inward -->
+        <path d="M132 128 C138 122 136 115 128 114" stroke="#3fb950" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M125 113 L130 112 L129 118" stroke="#3fb950" stroke-width="2" fill="#3fb950"/>
         <!-- Labels -->
-        <text x="55" y="148" text-anchor="middle" fill="#f0883e" font-size="10" font-family="-apple-system,sans-serif" font-weight="600">Theraband</text>
-        <text x="175" y="100" text-anchor="start" fill="#3fb950" font-size="10" font-family="-apple-system,sans-serif">nach</text>
-        <text x="175" y="112" text-anchor="start" fill="#3fb950" font-size="10" font-family="-apple-system,sans-serif">innen</text>
+        <text x="55" y="20" text-anchor="middle" fill="#3fb950" font-size="11" font-family="-apple-system,sans-serif" font-weight="600">Stehend – Fuß nach innen drehen</text>
+        <text x="160" y="148" text-anchor="middle" fill="#f0883e" font-size="9" font-family="-apple-system,sans-serif">Band am Pfosten</text>
+        <text x="62" y="130" text-anchor="middle" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">Stand-</text>
+        <text x="62" y="141" text-anchor="middle" fill="#6e7681" font-size="9" font-family="-apple-system,sans-serif">bein</text>
       </svg>
     </div>
     <div class="card-body">
@@ -730,13 +785,13 @@
         <span class="card-number">Übung 6 · Tibialis posterior stärken</span>
         <span class="card-done-badge">✓ Erledigt</span>
       </div>
-      <div class="card-title">Fußinnenrand – Theraband</div>
+      <div class="card-title">Fußinnenrand – Stehend</div>
       <div class="card-reps">3 × 15 Wiederholungen je Seite</div>
-      <div class="card-desc">Sitzend auf einem Stuhl. Ein Theraband um den Vorderfuß legen und am Stuhlbein oder an einem Möbel befestigen. Den Fuß langsam nach innen drehen, 2 Sekunden halten, dann kontrolliert zurück. Kein Schwung.</div>
+      <div class="card-desc">Theraband um den Vorderfuß schlaufen und an einem Torpfosten, Zaun oder Baum befestigen. Einen Schritt seitlich wegtreten bis das Band gespannt ist. Den Fuß langsam nach innen drehen, 2 Sekunden halten, kontrolliert zurück. Kein Schwung.</div>
       <div class="card-feel">💡 Du spürst die Arbeit an der Innenseite des Unterschenkels und unter dem Fußgewölbe – das ist der Muskel, den wir stärken wollen.</div>
       <div class="card-actions">
         <button class="btn-done" onclick="markDone(5)" id="btn-5">✓ Fertig</button>
-        <a class="btn-video" href="https://www.youtube.com/results?search_query=tibialis+posterior+theraband+uebung+fussgewoelbe+physiotherapie+deutsch" target="_blank">▶ <span>Video</span></a>
+        <a class="btn-video" href="https://www.youtube.com/results?search_query=tibialis+posterior+theraband+stehend+uebung+fussgewoelbe" target="_blank">▶ <span>Video</span></a>
       </div>
     </div>
   </div>
@@ -849,6 +904,72 @@ const TOTAL_EXERCISES  = 6;
 const BADGE_THRESHOLDS = [10, 25, 50, 100];
 const API              = '/api/sync';
 
+// ─── Daily Slogans (50) ───────────────────────────────────
+const SLOGANS = [
+  '„Jeder Profi war mal Anfänger. Du bist auf dem Weg."',
+  '„Champions trainieren auch dann, wenn es nicht läuft."',
+  '„Zeig dem Platz, was du draufhast."',
+  '„Kein Schritt zurück. Nur vorwärts."',
+  '„Dein größter Gegner ist die Ausrede."',
+  '„Heute legst du den Grundstein für morgen."',
+  '„Champions werden in der Reha gemacht."',
+  '„Zeig jedem, was in dir steckt."',
+  '„Du willst spielen? Dann trainiere."',
+  '„Jede Übung bringt dich näher an den Platz."',
+  '„Stärke entsteht nicht im Spiel – sondern hier."',
+  '„Du schaffst das. Punkt."',
+  '„Wer nicht aufgibt, der gewinnt."',
+  '„Zeig deinen Mitspielern, was du aus der Pause gemacht hast."',
+  '„Champions geben nicht auf – auch nicht in der Reha."',
+  '„Der Platz vermisst dich. Gib ihm Grund, dich zurückzuwollen."',
+  '„Jede Sekunde Dehnen ist ein Schritt Richtung Spielfeld."',
+  '„Zeig dem Schmerz, wer der Boss ist."',
+  '„Champions machen es, wenn niemand zuschaut."',
+  '„Ein Comeback braucht einen Plan. Du hast einen."',
+  '„Zeig dem Körper, was du von ihm verlangst."',
+  '„Nicht aufhören, wenn es schwer wird – weitermachen."',
+  '„Du bist stärker als du denkst."',
+  '„Jeder starke Spieler hatte mal eine Pause. Was zählt: der Rückweg."',
+  '„Champions wissen: die Pause macht den Unterschied."',
+  '„Zeig, was du aus dieser Zeit gemacht hast."',
+  '„Drei Runden am Tag – das ist der Preis für das Comeback."',
+  '„Du trainierst heute, damit du morgen spielen kannst."',
+  '„Kein Erfolg ohne Arbeit. Und du arbeitest."',
+  '„Champions stehen nach jedem Fall wieder auf."',
+  '„Zeig deinem Körper den Weg zurück."',
+  '„Schmerz ist temporär. Stolz ist für immer."',
+  '„Heute trainierst du für das Spiel, das noch kommt."',
+  '„Champions nutzen jede Minute. Auch diese."',
+  '„Zeig dem Trainer, wer zurückkommt."',
+  '„Du wirst wieder spielen. Dafür sorgst du gerade."',
+  '„Jede Übung ist eine Ansage: Ich bin zurück."',
+  '„Champions kennen ihren Plan. Du auch."',
+  '„Zeig deinen Gelenken, wer die Kontrolle hat."',
+  '„Einmal mehr als du aufhören willst – das reicht."',
+  '„Dein Comeback schreibt sich gerade – eine Einheit nach der anderen."',
+  '„Champions denken langfristig. Du auch."',
+  '„Zeig dem Schicksal, was du draus machst."',
+  '„Heute ist der Tag, an dem du entscheidest: ich kämpfe."',
+  '„Du bist ein Kämpfer. Beweis es dir selbst."',
+  '„Zeig, dass du die Pause genutzt hast."',
+  '„Champions arbeiten still. Und dann reden die Ergebnisse."',
+  '„Deine Mitspieler trainieren. Du auch."',
+  '„Zeig dem Platz: ich komme zurück."',
+  '„Stärker. Schneller. Schmerzfrei. Fang hier an."',
+];
+
+// ─── Benefit Messages (8) ─────────────────────────────────
+const BENEFIT_MESSAGES = [
+  'Deine Sehne wird stärker – jede Einheit zählt.',
+  'Dein Körper baut sich auf – du merkst es bald.',
+  'Drei Mal täglich – und dein Comeback kommt schneller.',
+  'Du trainierst, während andere pausieren. Das macht den Unterschied.',
+  'Jede Einheit bringt dich dem Platz näher.',
+  'Dein Körper dankt dir für diese Einheit.',
+  'Stärker als gestern – das bist du gerade geworden.',
+  'Champions arbeiten genau so. Weiter so.',
+];
+
 // ─── State ────────────────────────────────────────────────
 let doneToday     = new Set();
 let history       = [];
@@ -917,6 +1038,18 @@ function setSyncStatus(state, msg) {
   text.textContent = msg;
 }
 
+// ─── Daily Slogan ─────────────────────────────────────────
+function renderDailySlogan() {
+  const now   = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const dayOfYear = Math.floor((now - start) / 86400000);
+  const idx   = dayOfYear % SLOGANS.length;
+  document.getElementById('daily-slogan').textContent = SLOGANS[idx];
+  const days  = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+  document.getElementById('slogan-day-label').textContent =
+    days[now.getDay()] + ', ' + now.getDate() + '.' + (now.getMonth()+1) + '.';
+}
+
 // ─── Load & Init ──────────────────────────────────────────
 async function init() {
   deviceId = getOrCreateDeviceId();
@@ -934,6 +1067,7 @@ async function init() {
   refreshUI();
   renderCalendar();
   renderBadges();
+  renderDailySlogan();
   setSyncStatus('', 'Verbinde…');
 
   // 2. Merge with cloud (non-blocking)
@@ -995,6 +1129,8 @@ async function onSessionComplete() {
     localStorage.setItem('mn_history', JSON.stringify(history));
     recalcStreak();
   }
+  const benefitIdx = (totalSessions - 1) % BENEFIT_MESSAGES.length;
+  document.getElementById('complete-benefit').textContent = BENEFIT_MESSAGES[benefitIdx < 0 ? 0 : benefitIdx];
   document.getElementById('complete-banner').classList.add('show');
   document.getElementById('session-icon').textContent = '🎉';
   window.scrollTo({ top: 0, behavior: 'smooth' });
